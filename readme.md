@@ -2,6 +2,8 @@
 
 A quick and dirty command line program to study for my driver's test.
 
+![dmv screenshot](screenshot.png)
+
 (And be nice, it's my first ever Python script)
 
 ## Usage
