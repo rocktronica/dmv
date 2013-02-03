@@ -4,12 +4,15 @@ from random import randint
 import argparse
 import re
 
-# ideas: keep a list of problem questions, avoid duplicates, reprint failed questions!
+# ideas: keep a list of problem questions, reprint failed questions!, word wrap, single character input
 
 questions = json.load(open("questions.json"))
 
 def get_random_question():
-    return questions[randint(0, len(questions)) - 1]
+    if (len(questions) >= 1):
+        question = questions[randint(0, len(questions)) - 1]
+        questions.remove(question)
+        return question
 
 def get_correct_index(question):
     for i, option in enumerate(question.get("options")):
@@ -82,28 +85,31 @@ if __name__ == '__main__':
         answered = True
         correct = True
 
-        print_question(question)
+        if not question:
+            continue_questions = False
+        else:
+            print_question(question)
 
-        while (asking):
-            user_answer = prompt_for_answer(question)
-            if (user_answer.get("letter") == "Q"):
-                asking = False
-                answered = False
-                continue_questions = False
-            elif (user_answer.get("correct")):
-                asking = False
-            elif (not user_answer.get("correct")):
-                correct = False
+            while (asking):
+                user_answer = prompt_for_answer(question)
+                if (user_answer.get("letter") == "Q"):
+                    asking = False
+                    answered = False
+                    continue_questions = False
+                elif (user_answer.get("correct")):
+                    asking = False
+                elif (not user_answer.get("correct")):
+                    correct = False
 
-        print
-
-        if answered:
-            questions_total += 1
-            print "  That's right!"
-            print "  " + answer_as_sentence(question)
             print
-            if correct:
-                questions_correct += 1
+
+            if answered:
+                questions_total += 1
+                print "  That's right!"
+                print "  " + answer_as_sentence(question)
+                print
+                if correct:
+                    questions_correct += 1
 
     if (questions_total > 0):
         print "Correct: " + str(questions_correct) + "/" + str(questions_total)
