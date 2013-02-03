@@ -4,7 +4,7 @@ from random import randint
 import argparse
 import re
 
-# ideas: keep a list of problem questions, reprint failed questions!, word wrap, single character input
+# ideas: keep a list of problem questions, reprint failed questions!, single character input
 
 questions = json.load(open("questions.json"))
 
@@ -23,9 +23,9 @@ def get_correct_letter(question):
     return index_to_letter(get_correct_index(question))
 
 def print_question(question):
-    print question.get("label")
+    wrap_print(question.get("label"))
     for i, option in enumerate(question.get("options")):
-        print "  " + index_to_letter(i) + ": " + option.get("text")
+        wrap_print(index_to_letter(i) + ": " + option.get("text"), 2, 5)
 
 def prompt_for_answer(question):
     correct_letter = get_correct_letter(question)
@@ -66,6 +66,37 @@ def index_to_letter(index):
 def percent_score(correct, total):
     return str(int(float(questions_correct) / float(questions_total) * 100)) + "%"
 
+# First pass at implementation, confident there are more efficient ways!
+def wrap_print(string, first_line_indent=0, other_lines_indent=0, line_width=80):
+    on_first_line = True
+    current_line_length = line_width - first_line_indent
+
+    lines = [string]
+
+    while (len(lines[-1]) > current_line_length):
+        old_last_line = lines[-1]
+
+        split_at = old_last_line[0:current_line_length].rindex(" ") + 1
+        if (split_at == -1):
+            split_at = current_line_length
+
+        second_to_last_line = old_last_line[0:split_at]
+        new_last_line = old_last_line[split_at:len(old_last_line)]
+
+        lines[-1] = second_to_last_line
+        lines.append(new_last_line)
+
+        if (on_first_line):
+            current_line_length = line_width - other_lines_indent
+            on_first_line = False
+
+    indent = (" " * first_line_indent)
+    for i, line in enumerate(lines):
+        lines[i] = indent + line
+        indent = (" " * other_lines_indent)
+
+    print "\n".join(lines)
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-q", "--questions", help="number of questions to ask", type=int)
@@ -105,12 +136,12 @@ if __name__ == '__main__':
 
             if answered:
                 questions_total += 1
-                print "  That's right!"
-                print "  " + answer_as_sentence(question)
+                wrap_print("That's right!", 2)
+                wrap_print(answer_as_sentence(question), 2, 2)
                 print
                 if correct:
                     questions_correct += 1
 
     if (questions_total > 0):
-        print "Correct: " + str(questions_correct) + "/" + str(questions_total)
-        print "Score:   " + percent_score(questions_correct, questions_total)
+        wrap_print("Correct: " + str(questions_correct) + "/" + str(questions_total))
+        wrap_print("Score:   " + percent_score(questions_correct, questions_total))
