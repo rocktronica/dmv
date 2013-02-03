@@ -2,18 +2,22 @@ import json
 import sys
 from random import randint
 import argparse
+import re
 
-# ideas: answer as sentence, keep a list of problem questions, avoid duplicates, reprint failed questions!
+# ideas: keep a list of problem questions, avoid duplicates, reprint failed questions!
 
 questions = json.load(open("questions.json"))
 
 def get_random_question():
     return questions[randint(0, len(questions)) - 1]
 
-def get_correct_letter(question):
+def get_correct_index(question):
     for i, option in enumerate(question.get("options")):
         if option.get("isAnswer"):
-            return index_to_letter(i)
+            return i
+
+def get_correct_letter(question):
+    return index_to_letter(get_correct_index(question))
 
 def print_question(question):
     print question.get("label")
@@ -29,6 +33,29 @@ def prompt_for_answer(question):
         'letter': user_answer_letter,
         'correct': user_answer_letter == correct_letter
     }
+
+def answer_as_sentence(question):
+    label = question.get("label").strip()
+    answer = question.get("options")[get_correct_index(question)].get("text")
+    sentence = None
+
+    if (label[-1:] == ":"):
+        separator = " "
+        if (label.lower().find("when") == 0) and (label.find(",") == -1):
+            separator = ", "
+        sentence = label[:-1] + separator + lowercase_first(answer)
+    elif (label.find("__") > -1):
+        sentence = re.sub(r'_+', answer, label)
+    else:
+        sentence = label + " " + answer
+
+    if (not sentence[-1:] == "."):
+        sentence += "."
+
+    return sentence
+
+def lowercase_first(str):
+    return str[:1].lower() + str[1:]
 
 def index_to_letter(index):
     return chr(index + 65)
@@ -72,7 +99,9 @@ if __name__ == '__main__':
 
         if answered:
             questions_total += 1
-            print "  That's right! \n"
+            print "  That's right!"
+            print "  " + answer_as_sentence(question)
+            print
             if correct:
                 questions_correct += 1
 
