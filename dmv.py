@@ -1,6 +1,6 @@
 import json
 import sys
-from random import randint
+import random
 import argparse
 import re
 import os
@@ -9,9 +9,13 @@ import os
 
 questions = json.load(open(os.path.dirname(__file__) + "/questions.json"))
 
+# Randomize possible answers
+for i, question in enumerate(questions):
+    random.shuffle(questions[i].get("options"))
+
 def get_random_question():
     if (len(questions) >= 1):
-        question = questions[randint(0, len(questions)) - 1]
+        question = questions[random.randint(0, len(questions)) - 1]
         questions.remove(question)
         return question
 
