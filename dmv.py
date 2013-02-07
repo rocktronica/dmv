@@ -3,10 +3,11 @@ import sys
 from random import randint
 import argparse
 import re
+import os
 
 # ideas: keep a list of problem questions, reprint failed questions!, single character input
 
-questions = json.load(open("questions.json"))
+questions = json.load(open(os.path.dirname(__file__) + "/questions.json"))
 
 def get_random_question():
     if (len(questions) >= 1):
