@@ -7,7 +7,7 @@ import os
 
 # ideas: keep a list of problem questions, reprint failed questions!, single character input
 
-questions = json.load(open(os.path.dirname(__file__) + "/questions.json"))
+questions = json.load(open(os.path.dirname(os.path.realpath(__file__)) + "/questions.json"))
 
 # Randomize possible answers
 for i, question in enumerate(questions):
